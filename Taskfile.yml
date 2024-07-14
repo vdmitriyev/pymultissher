@@ -1,15 +1,26 @@
 version: '3'
 
+vars:
+  PACKAGE_NAME: "pymultissher"
+  VENV_DIR: ".venv"
+
 includes:
   win: ./Taskfile_windows.yml
-  
+
 tasks:
+  default:
+    silent: true
+    cmds:
+      - task --list-all
+      - echo ""
+      - echo "Example usage-> 'task check-virtualenv'"
 
   check-virtualenv:
     silent: true
+    run: once
     cmds:
-      - echo "Check .env folder"
-      - test -d .venv
+      - echo "Check existence of a virtual directory-> {{.VENV_DIR}}"
+      - test -d {{.VENV_DIR}}
       - echo -n "Check if virtual environment is active-> " && python -c "import sys; print('virtualenv is active' if sys.prefix != sys.base_prefix else 'virtualenv is NOT active')"
       - python -c "import sys; exit(1 if sys.prefix == sys.base_prefix else 0)"
       - python --version
@@ -28,17 +39,16 @@ tasks:
       - rm -fr build/
       - rm -fr dist/
       - rm -fr .eggs/
-      - find . -name '*.egg-info' -exec rm -fr {} +
-      - find . -name '*.egg' -exec rm -f {} +
+      - rm -fr {{.PACKAGE_NAME}}.egg-info
 
   clean-pyc:
     deps: [check-virtualenv]
     cmds:
       - echo "remove Python file artifacts"
-      - find . -name '*.pyc' -exec rm -f {} +
-      - find . -name '*.pyo' -exec rm -f {} +
-      - find . -name '*~' -exec rm -f {} +
-      - find . -name '__pycache__' -exec rm -fr {} +
+      #- find . -name '*.pyc' -exec rm -f {} +
+      #- find . -name '*.pyo' -exec rm -f {} +
+      #- find . -name '*~' -exec rm -f {} +
+      #- find . -name '__pycache__' -exec rm -fr {} +
 
   clean-test:
     deps: [check-virtualenv]
@@ -49,16 +59,38 @@ tasks:
       - rm -fr htmlcov/
       - rm -fr .pytest_cache
 
-  run:
+  cli-run-help:
     deps: [check-virtualenv]
     cmds:
-      - python --version
+      - python -m pymultissher --help
 
-  dist:
+  dev-install:
     deps: [check-virtualenv]
-    cmds:  
+    cmds:
+      - pip install --editable .
+      - python -c "import {{.PACKAGE_NAME}}"
+
+  dev-uninstall:
+    deps: [check-virtualenv]
+    cmds:
+      - pip uninstall {{.PACKAGE_NAME}}
+
+  dev-pre-commit:
+    deps: [check-virtualenv]
+    cmds:
+      - pre-commit run --all-files
+
+  build:
+    deps: [check-virtualenv]
+    cmds:
       - echo "builds source and wheel package"
-      - task: clean-all
-      - python setup.py sdist
-      - python setup.py bdist_wheel
+      - task: clean-build
+      - py -m build
       - ls -l dist
+
+  publish-test-pypi:
+    deps: [check-virtualenv]
+    cmds:
+      - echo "builds source and wheel package"
+      - task: build
+      - py -m twine upload --repository testpypi dist/*

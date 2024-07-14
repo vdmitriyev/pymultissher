@@ -3,7 +3,7 @@ cd ..
 setlocal
 :PROMPT
 SET AREYOUSURE=N
-SET /P AREYOUSURE=Do you want to create new virtual environment (Y/[N])? 
+SET /P AREYOUSURE=Do you want to create new virtual environment (Y/[N])?
 IF /I "%AREYOUSURE%" NEQ "Y" GOTO END
 
 SET PATH=C:\Compilers\Python312\Scripts\;C:\Compilers\Python312\;%PATH%

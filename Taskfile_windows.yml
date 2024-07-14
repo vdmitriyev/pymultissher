@@ -21,15 +21,15 @@ tasks:
   init-env:
     silent: true
     deps: [workaround-infos]
-    cmds:    
+    cmds:
       - echo 'Use instead "scripts/cmdInitiateEnv.bat"'
 
-  active-env:
+  activate-env:
     silent: true
     deps: [workaround-infos]
     cmds:
       - echo 'Use "scripts/cmdStartEnv.bat"'
-  
+
   workaround-infos:
     silent: true
     cmds:

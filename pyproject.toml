@@ -1,0 +1,73 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pymultissher"
+version = "0.1.1"
+description = "pymultissher is a simple CLI tool that runs commands on multiple servers at once using SSH"
+readme = "README.md"
+authors = [
+  {name = "vdmitriyev"}
+]
+maintainers = [
+  {name = "vdmitriyev"}
+]
+dependencies = [
+  "paramiko >=3.4.0",
+  "click >=8.1.7",
+  "typer >=0.12.3"
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+license = {text = "MIT license"}
+
+
+[entry_points]
+console_scripts = ["pymultissher = pymultissher.cli:main"]
+
+[project.optional-dependencies]
+dev = [
+    "coverage",  # testing
+    "mypy",  # linting
+    "pytest",  # testing
+    "ruff"  # linting
+]
+
+[project.urls]
+
+bugs = "https://github.com/vdmitriyev/pymultissher/issues"
+changelog = "https://github.com/vdmitriyev/pymultissher/blob/master/changelog.md"
+homepage = "https://github.com/vdmitriyev/pymultissher"
+
+
+#[tool.setuptools]
+#package-dir = {"" = "src"}
+
+
+[tool.setuptools.package-data]
+"*" = ["*.*"]
+
+[tool.setuptools.packages.find]
+include = ["pymultissher"]
+exclude = ["scripts*", "tests*"]
+
+[tool.black]
+line-length = 120
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
