@@ -1,12 +1,13 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=61.0",  "wheel"]
 build-backend = "setuptools.build_meta"
+
 
 [project]
 name = "pymultissher"
-version = "0.2.0"
 description = "pymultissher is a simple CLI tool that runs commands on multiple servers at once using SSH"
 readme = "README.md"
+version = "0.3.3"
 authors = [
   {name = "vdmitriyev"}
 ]
@@ -25,7 +26,6 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 license = {text = "MIT license"}
-
 
 [entry_points]
 console_scripts = ["pymultissher = pymultissher.cli:main"]

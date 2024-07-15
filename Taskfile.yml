@@ -2,10 +2,14 @@ version: '3'
 
 vars:
   PACKAGE_NAME: "pymultissher"
+  PACKAGE_VERSION:
+    sh:
+        python -c "import importlib.metadata; print(importlib.metadata.version('{{.PACKAGE_NAME}}'))"
   VENV_DIR: ".venv"
 
 includes:
   win: ./Taskfile_windows.yml
+  extra: ./Taskfile_extra.yml
 
 tasks:
   default:
@@ -63,6 +67,7 @@ tasks:
     deps: [check-virtualenv]
     cmds:
       - python -m pymultissher --help
+      - echo {{.PACKAGE_VERSION}}
 
   dev-install:
     deps: [check-virtualenv]
@@ -79,6 +84,38 @@ tasks:
     deps: [check-virtualenv]
     cmds:
       - pre-commit run --all-files
+
+  dev-tag-version:
+    deps: [check-virtualenv]
+    cmds:
+      - task: build
+      - echo  {{.PACKAGE_VERSION}}
+
+  dev-tag-create:
+    deps: [check-virtualenv]
+    cmds:
+      - task: build
+      - git tag {{.PACKAGE_VERSION}}
+      - task: dev-tag-describe
+
+  dev-tag-re-create:
+    deps: [check-virtualenv]
+    cmds:
+      - git tag -d {{.PACKAGE_VERSION}}
+      - task: dev-tag-create
+
+  dev-tag-describe:
+    deps: [check-virtualenv]
+    cmds:
+      - echo "git tags"
+      - git tag
+      - echo "latest git tags"
+      - git describe --tags --abbrev=0
+
+  dev-tag-push:
+    deps: [check-virtualenv]
+    cmds:
+        - git push --tags origin
 
   build:
     deps: [check-virtualenv]
