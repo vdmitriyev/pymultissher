@@ -1,6 +1,6 @@
 ## About
 
-pymultissher is a simple CLI tool that runs commands on multiple servers at once using SSH.
+pymultissher is a simple CLI tool that runs commands on multiple servers over SSH.
 
 ## Why "yet another" SSH tool?
 

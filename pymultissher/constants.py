@@ -12,3 +12,6 @@ SUPPORTED_SSH_KEY_TYPES = ["rsa", "ed25519"]
 # read global
 VERBOSE = os.environ.get("VERBOSE") or "False"
 VERBOSE = VERBOSE.upper() == "TRUE"
+
+YAML_FILE_DOMAINS = "domains.yml"
+YAML_FILE_COMMANDS = "commands.yml"

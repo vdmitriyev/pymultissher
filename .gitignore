@@ -1,6 +1,9 @@
 # custom-files
 domains.json
 .env
+commands.yml
+domains.yml
+
 
 # extentions
 *.csv
