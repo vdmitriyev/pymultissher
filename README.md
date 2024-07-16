@@ -42,7 +42,7 @@ Should be run as Python module (e.g., ```python -m pymultissher --help```)
 
 ## Documentation
 
-[Documentation](https://vdmitriyev.github.com/pymultissher/)
+[Documentation](https://vdmitriyev.github.io/pymultissher/)
 
 ## Contributing
 
