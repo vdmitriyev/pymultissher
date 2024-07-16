@@ -4,6 +4,12 @@ class MultiSSHerException(Exception):
     pass
 
 
+class MultiSSHerNotSupported(Exception):
+    """Exception for non supported features"""
+
+    pass
+
+
 class MultiSSHerCreateClient(Exception):
     """MultiSSHer was not able to create SSH client"""
 

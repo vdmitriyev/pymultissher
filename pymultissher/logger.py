@@ -17,7 +17,7 @@ def get_logger(logger_name: str = None, logging_level: int = None) -> None:
 
     # silence paramiko logging
     transport_logger = logging.getLogger("paramiko.transport")
-    transport_logger.setLevel(logging.INFO)
+    transport_logger.setLevel(logging.ERROR)
 
     # Sets up a logger that logs to both a file and the console.
     formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")

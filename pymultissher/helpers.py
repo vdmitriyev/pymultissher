@@ -5,6 +5,6 @@ def handle_dict_keys(data: dict, key: str) -> None:
         data (dict): dictionary with data
         key (str): key of the dit to be checked
     """
-
+    print(key)
     if key not in data:
         data[key] = {}

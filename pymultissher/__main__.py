@@ -1,3 +1,4 @@
+import json
 import os
 import traceback
 from sys import platform
@@ -9,9 +10,10 @@ from rich.console import Console
 from typing_extensions import Annotated
 
 from pymultissher import __description__
-from pymultissher.constants import YAML_FILE_COMMANDS, YAML_FILE_DOMAINS
+from pymultissher.constants import VERBOSE, YAML_FILE_COMMANDS, YAML_FILE_DOMAINS
 from pymultissher.exceptions import (
     MultiSSHerCreateClient,
+    MultiSSHerNotSupported,
     YAMLConfigExists,
     YAMLValidationError,
 )
@@ -22,63 +24,67 @@ from pymultissher.pymultissher import MultiSSHer, YAMLEmptyConfigHandler, YAMLHa
 app = typer.Typer(help=__description__)
 
 
-# def info_param_callback(value: str):
-#     if value != "info":
-#         raise typer.BadParameter("Only allowed: info")
-#     return value
-
-
 @app.command()
-def get_info(
-    filename: Annotated[
+def run_batch(
+    file_domains: Annotated[
         Optional[str],
-        typer.Option(prompt=False, help="Path to the YAML file containing domain names"),
-    ] = "domains.json",
-    filter_domain: Annotated[
+        typer.Option(prompt=False, help="YAML file with domain names of servers"),
+    ] = YAML_FILE_DOMAINS,
+    file_commands: Annotated[
+        Optional[str],
+        typer.Option(prompt=False, help="YAML file with command to be run on servers"),
+    ] = YAML_FILE_COMMANDS,
+    filter: Annotated[
         Optional[str],
         typer.Option(prompt=False, help="Filters domains to be used"),
     ] = None,
 ):
     """
-    Gathers different information from servers over SSH
+    Runs a batch of commands over SSH
     """
 
-    if not os.path.exists(filename):
-        raise FileNotFoundError(f"File not found: {filename}")
+    if not os.path.exists(file_domains):
+        raise FileNotFoundError(f"File not found: {file_domains}")
+
+    if file_commands is not None and not os.path.exists(file_commands):
+        raise FileNotFoundError(f"File not found: {file_commands}")
 
     logger = get_logger()
     ssher = MultiSSHer(logger=logger)
-    ssher.load_domains(filename)
 
-    filtered_domains = ssher.apply_filter_on_domains(filter=filter_domain)
+    ssher.load_defaults(file_domains)
+    ssher.load_domains(file_domains)
+
+    commands = []
+    if file_commands is not None:
+        yml_commands = YAMLHandler(logger=logger, filename=file_commands)
+        yml_commands.load_data()
+        commands = yml_commands.data
+        print(f"Found command: {len(commands['commands'])}")
+
+    filtered_domains = ssher.apply_filter_on_domains(filter=filter)
 
     for item in filtered_domains:
         try:
-            ssh_host = ssher.parse_hostname_item(item)
+
+            ssh_host = ssher.parse_hostname_item(item["domain"])
             handle_dict_keys(ssher.data, key=ssh_host.domain)
             ssher.create_client(ssh_host)
+
             if ssher.client is None:
                 raise MultiSSHerCreateClient()
 
             if ssher.client is not None:
-                # SSH version
-                ssher.run_command_over_ssh(
-                    hostname=ssh_host.domain, cmd="ssh -V", category_name="ssh", field_name="version"
-                )
-                # fail2ban status
-                ssher.run_command_over_ssh(
-                    hostname=ssh_host.domain,
-                    cmd="systemctl status fail2ban | grep running",
-                    category_name="fail2ban",
-                    field_name="status",
-                )
-                # asgard2 status
-                ssher.run_command_over_ssh(
-                    hostname=ssh_host.domain,
-                    cmd="systemctl status asgard2-agent.service | grep running",
-                    category_name="asgard2",
-                    field_name="status",
-                )
+                for cmd_item in commands["commands"]:
+                    cmd = cmd_item["item"]
+                    logger.debug(f"Run command: {cmd['command']}")
+                    ssher.run_command_over_ssh(
+                        hostname=ssh_host.domain,
+                        cmd=cmd["command"],
+                        category_name=cmd["report"]["category"],
+                        field_name=cmd["report"]["field"],
+                    )
+
                 ssher.close_client()
 
         except Exception:
@@ -89,10 +95,10 @@ def get_info(
 
 @app.command()
 def run_command(
-    filename: Annotated[
+    filedomains: Annotated[
         Optional[str],
         typer.Option(prompt=False, help="Path to the YAML file containing domain names"),
-    ] = "domains.json",
+    ] = YAML_FILE_DOMAINS,
     command: Annotated[
         Optional[str],
         typer.Option(prompt=False, help="Command to be run on the server"),
@@ -102,20 +108,22 @@ def run_command(
         typer.Option(prompt=False, help="Filters domains to be used"),
     ] = None,
 ):
-    """Runs a given command on servers over SSH (default: whoami)"""
+    """Runs a single command over SSH (default: whoami)"""
 
-    if not os.path.exists(filename):
-        raise FileNotFoundError(f"File not found: {filename}")
+    if not os.path.exists(filedomains):
+        raise FileNotFoundError(f"File not found: {filedomains}")
 
     logger = get_logger()
     ssher = MultiSSHer(logger=logger)
-    ssher.load_domains(filename)
+
+    ssher.load_defaults(filedomains)
+    ssher.load_domains(filedomains)
 
     filtered_domains = ssher.apply_filter_on_domains(filter=filter_domain)
 
     for item in filtered_domains:
         try:
-            ssh_host = ssher.parse_hostname_item(item)
+            ssh_host = ssher.parse_hostname_item(item["domain"])
             handle_dict_keys(ssher.data, key=ssh_host.domain)
             ssher.create_client(ssh_host)
             if ssher.client is None:
@@ -143,15 +151,18 @@ def verify(
         typer.Option(prompt=False, help="Path to the YAML file containing domain names"),
     ] = YAML_FILE_DOMAINS,
     target: Annotated[
-        Optional[str],
-        typer.Option(prompt=False, help="Specifies what to verify: domains or commands"),
+        Optional[str], typer.Option(prompt=False, help="Specifies what to verify: domains or commands")
     ] = "domains",
     verbose: Annotated[
         Optional[bool],
         typer.Option(prompt=False, help="Verbose options for exceptions"),
     ] = False,
 ):
-    """Verify yml file"""
+    """Verify a given YAML file"""
+
+    if verbose:
+        global VERBOSE
+        VERBOSE = True
 
     if not os.path.exists(filename):
         raise FileNotFoundError(f"File not found: {filename}")
@@ -174,6 +185,9 @@ def verify(
             console.print(f"{ex}", style="red")
             if verbose:
                 console.print_exception(show_locals=True)
+    else:
+        raise MultiSSHerNotSupported(f"Proved target is not supported: {target}")
+
     if verbose:
         yml_handler.to_console()
 
@@ -193,7 +207,7 @@ def init(
         typer.Option(prompt=False, help="Verbose options for exceptions"),
     ] = False,
 ):
-    """Generates an empty YAML configuration files with defaults, domains and commands"""
+    """Generates initial YAML configuration files with SSH defaults, domains and commands"""
 
     logger = get_logger()
     console = Console()

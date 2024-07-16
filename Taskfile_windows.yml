@@ -8,7 +8,6 @@ vars:
   PYVENV_PROMNT: "(.venv)"
   NEW_PATH: "{{.PYVENV_PATH}};{{.PATH}}"
 
-
 env:
   PATH: "{{.NEW_PATH}}"
   NEW_PATH: "{{.NEW_PATH}}"

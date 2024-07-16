@@ -9,7 +9,6 @@ vars:
 
 includes:
   win: ./Taskfile_windows.yml
-  extra: ./Taskfile_extra.yml
 
 tasks:
   default:
@@ -63,11 +62,12 @@ tasks:
       - rm -fr htmlcov/
       - rm -fr .pytest_cache
 
-  cli-run-help:
+  package-help:
     deps: [check-virtualenv]
     cmds:
+      - echo 'package version {{.PACKAGE_VERSION}}'
       - python -m pymultissher --help
-      - echo {{.PACKAGE_VERSION}}
+
 
   dev-install:
     deps: [check-virtualenv]

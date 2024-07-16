@@ -23,15 +23,16 @@ from pymultissher.exceptions import (
     YAMLValidationError,
 )
 from pymultissher.logger import get_logger
+from pymultissher.yamlhandler import YAMLEmptyConfigHandler, YAMLHandler
 
 
 @dataclass
 class SSHCredentials:
-    domain: str
+    domain: str = "localhost"
     port: int = 22
     username: str = "root"
-    ssh_key_path: str = ""
-    ssh_key_password: str = ""
+    ssh_key_path: str = "~/.ssh/id_rsa"
+    ssh_key_password: str = None
     ssh_key_type: str = "rsa"
 
 
@@ -43,15 +44,9 @@ class MultiSSHer:
 
         self.logger = logger
         self.logger.debug('class "MultiSSHer" was created')
-        self.init_directory()
         self.data = {}
-
+        self.ssh_defaults = SSHCredentials()
         self.console = Console()
-
-    def init_directory(self):
-        pass
-        # if not os.path.exists(OUTPUT_DIR):
-        #     os.mkdir(OUTPUT_DIR)
 
     def verbose_print(self, msg: str) -> None:
         if VERBOSE:
@@ -62,18 +57,46 @@ class MultiSSHer:
         self.console.print("Print verbose information:", style="white")
         self.console.print(VERBOSE, style="red")
 
-    def get_default_ssh_values(self):
-        self.default_ssh_username = os.getenv("SSH_USERNAME_DEFAULT", "root")
-        self.default_ssh_key_file_path = os.getenv("SSH_KEY_PATH_DEFAULT", "~/.ssh/id_rsa")
-        self.default_ssh_key_password = os.getenv("SSH_KEY_PASSWORD_DEFAULT", None)
-        self.get_default_ssh_key_type()
+    def load_defaults(self, filename: str):
+        """Loads default SSH values to be use from a config file
 
-    def get_default_ssh_key_type(self):
-        self.default_ssh_key_type = os.getenv("SSH_KEY_TYPE_DEFAULT", "rsa")
-        self.default_ssh_key_type = self.default_ssh_key_type.lower()
+        Args:
+            filename (str): _description_
+        """
+        yml_handler = YAMLHandler(logger=self.logger, filename=filename)
+        yml_handler.load_data()
 
-        if self.default_ssh_key_type not in SUPPORTED_SSH_KEY_TYPES:
-            raise MultiSSHerException(f"Only following keys supported: {SUPPORTED_SSH_KEY_TYPES}")
+        if "user" in yml_handler.data["defaults"]:
+            self.ssh_defaults.username = yml_handler.data["defaults"]["user"]
+        if "port" in yml_handler.data["defaults"]:
+            self.ssh_defaults.port = yml_handler.data["defaults"]["port"]
+        if "ssh_key_path" in yml_handler.data["defaults"]:
+            self.ssh_defaults.ssh_key_path = yml_handler.data["defaults"]["ssh_key_path"]
+        elif os.name == "nt":
+            self.ssh_defaults.ssh_key_path = os.path.join(os.environ["HOME"], ".ssh", "id_rsa")
+
+        if "ssh_key_password" in yml_handler.data["defaults"]:
+            self.ssh_defaults.ssh_key_password = yml_handler.data["defaults"]["ssh_key_password"]
+
+        if "ssh_key_type" in yml_handler.data["defaults"]:
+            self.ssh_defaults.ssh_key_type = yml_handler.data["defaults"]["ssh_key_type"]
+            self.ssh_defaults.ssh_key_type = self.ssh_defaults.ssh_key_type.lower()
+            if self.ssh_defaults.ssh_key_type not in SUPPORTED_SSH_KEY_TYPES:
+                raise MultiSSHerException(f"Only following keys supported: {SUPPORTED_SSH_KEY_TYPES}")
+
+    def load_domains(self, filename: str):
+        """Loads domains from JSON
+
+        Args:
+            filename (str): Name of the file
+        """
+        yml_handler = YAMLHandler(logger=self.logger, filename=filename)
+        yml_handler.load_data()
+
+        if "domains" not in yml_handler.data:
+            raise MultiSSHerException(f"Do domains were found")
+
+        self.domains = yml_handler.data["domains"]
 
     def create_client(self, ssh_host: SSHCredentials) -> None:
         """Creates a client to connect to server over SSH using a custom private key
@@ -193,11 +216,9 @@ class MultiSSHer:
             SSHCredentials: Data class that contains all necessary parameters for SSH connection
         """
 
-        ssh_obj = SSHCredentials
-        self.get_default_ssh_values()
-
-        if "domain" in item:
-            ssh_obj.domain = item["domain"]
+        ssh_obj = SSHCredentials()
+        if "name" in item:
+            ssh_obj.domain = item["name"]
             self.verbose_print(f"{datetime.now()} domain: {ssh_obj.domain}")
             logging.debug(f"domain: {ssh_obj.domain}")
 
@@ -205,38 +226,27 @@ class MultiSSHer:
             ssh_obj.port = int(item["port"])
             logging.debug(f"port: {ssh_obj.port}")
 
-        ssh_obj.username = self.default_ssh_username
+        ssh_obj.username = self.ssh_defaults.username
         if "user" in item:
             ssh_obj.username = item["user"]
             self.verbose_print(f"{datetime.now()} user: {ssh_obj.username}")
 
-        ssh_obj.ssh_key_path = self.default_ssh_key_file_path
+        ssh_obj.ssh_key_path = self.ssh_defaults.ssh_key_path
         if "ssh_key_path" in item:
             ssh_obj.ssh_key_path = item["ssh_key_path"]
             self.verbose_print(f"{datetime.now()} ssh_key_path: {ssh_obj.ssh_key_path}")
 
-        ssh_obj.ssh_key_password = self.default_ssh_key_password
+        ssh_obj.ssh_key_password = self.ssh_defaults.ssh_key_password
         if "ssh_key_password" in item:
             ssh_obj.ssh_key_password = item["ssh_key_password"]
             self.verbose_print(f"{datetime.now()} ssh_key_password: **HIDDEN**")
 
-        ssh_obj.ssh_key_type = self.default_ssh_key_type
+        ssh_obj.ssh_key_type = self.ssh_defaults.ssh_key_type
         if "ssh_key_type" in item:
             ssh_obj.ssh_key_type = item["ssh_key_type"]
             self.verbose_print(f"{datetime.now()} ssh_key_type: {ssh_obj.ssh_key_type}")
 
         return ssh_obj
-
-    def load_domains(self, filename: str):
-        """Loads domains from JSON
-
-        Args:
-            filename (str): Name of the file
-        """
-        self.domains = {}
-        self.logger.debug(f"file with domain names: {filename}")
-        with open(filename) as json_file:
-            self.domains = json.load(json_file)
 
     def apply_filter_on_domains(self, filter: str):
         """Apply filter on domains
@@ -265,151 +275,3 @@ class MultiSSHer:
     def to_console(self):
         """Prints gathered data"""
         print_json(json.dumps(self.data, indent=4))
-
-
-class YAMLHandler:
-
-    def __init__(self, filename: str, logger=None):
-        """_summary_
-
-        Args:
-            filename (str, optional): The filename with YAML configuration to be used
-            logger (logging, optional): The logger instable to ber used. Defaults to get_logger.
-        """
-
-        if logger is None:
-            logger = get_logger()
-        self.logger = logger
-        self.filename = filename
-        self.data = {}
-
-    def load_data(self):
-        """
-        Loads the YAML data from the specified file path.
-
-        Raises:
-            YAMLError: If there's an error loading the YAML file.
-        """
-        try:
-            with open(self.filename, "r") as f:
-                self.data = yaml.safe_load(f)
-        except yaml.YAMLError as e:
-            raise YAMLGenericException(f"Error loading YAML file: {e}")
-
-    def verify_domains(self):
-        """
-        Verifies the structure and basic data types of the YAML data.
-
-        Raises:
-            ValidationError: If there are any validation errors.
-        """
-        errors = []
-
-        # Verify 'defaults' section
-        if "defaults" not in self.data:
-            errors.append("'defaults' section is missing")
-        elif self.data["defaults"] is None:
-            errors.append("'defaults' section is empty")
-        else:
-            self.verify_section(self.data["defaults"], expected_keys=["user"])
-
-        # Verify 'domains' section
-        if "domains" not in self.data:
-            errors.append("'domains' section is missing")
-
-        if not isinstance(self.data["domains"], list):
-            errors.append("'domains' section should be a list")
-        elif self.data["domains"] is None:
-            errors.append("'domains' section is empty")
-        else:
-            for i, domain_item in enumerate(self.data["domains"]):
-                self.verify_section(domain_item, expected_keys=["domain"])
-                domain_values = domain_item["domain"]
-                self.verify_section(domain_values, expected_keys=["host"])
-
-                # options should be strings
-                for key in ["ssh_key_path", "ssh_key_type", "user"]:
-                    if key in domain_values and not isinstance(domain_values[key], str):
-                        errors.append(f"Domain {i+1}: '{key}' should be a string")
-
-                # options should to int
-                for key in ["port"]:
-                    if key in domain_values:
-                        domain_values[key] = int(domain_values[key])
-
-        if errors:
-            raise YAMLValidationError("\n" + "\n".join(errors))
-
-    def verify_section(self, section_data, expected_keys):
-        """
-        Verifies if a section has the expected keys and their values are not None.
-
-        Args:
-            section_data: The data of the section to verify.
-            expected_keys: A list of expected keys in the section.
-
-        Raises:
-            ValidationError: If there are any missing keys or None values.
-        """
-        missing_keys = [key for key in expected_keys if key not in section_data]
-        if missing_keys:
-            raise YAMLValidationError(f"Missing keys: {', '.join(missing_keys)}")
-
-        for key, value in section_data.items():
-            if value is None:
-                raise YAMLValidationError(f"Value for '{key}' cannot be None")
-
-    def to_console(self):
-        """Prints YML config data"""
-        print_json(json.dumps(self.data, indent=4))
-
-
-class YAMLEmptyConfigHandler:
-
-    def generate_empty_configs_domains(self, filename: str = YAML_FILE_DOMAINS):
-        """Generates an empty YAML configuration file with defaults and domains.
-
-
-        Args:
-            filename (str, optional): The filename with YAML configuration to be created. Defaults to YAML_FILE_DOMAINS.
-
-        Raises:
-            YAMLConfigExists: raised, if config file already exists
-        """
-
-        if os.path.exists(filename):
-            raise YAMLConfigExists(f"Found existing config for domains: {filename}")
-
-        domains_config = {
-            "defaults": {"port": "22", "user": "root", "ssh_key_path": "~/.ssh/id_rsa", "ssh_key_type": "rsa"},
-            "domains": [
-                {
-                    "domain": {
-                        "host": "localhost",
-                        "port": 22,
-                        "user": "root",
-                        "ssh_key_path": "~/.ssh/id_rsa",
-                        "ssh_key_type": "rsa",
-                    }
-                }
-            ],
-        }
-
-        with open(filename, "w") as outfile:
-            yaml.dump(domains_config, outfile, default_flow_style=False)
-
-    def generate_empty_configs_commands(self, filename: str = YAML_FILE_COMMANDS):
-        """Generates an empty YAML configuration file with commands."""
-
-        if os.path.exists(filename):
-            raise YAMLConfigExists(f"Found existing config for commands: {filename}")
-
-        config = {
-            "commands": [
-                {"item": {"command": "whoami", "tag": "all"}},
-                {"item": {"command": "hostname", "tag": "all"}},
-            ],
-        }
-
-        with open(filename, "w") as outfile:
-            yaml.dump(config, outfile, default_flow_style=False)
