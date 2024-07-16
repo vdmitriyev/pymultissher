@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 name = "pymultissher"
 description = "pymultissher is a simple CLI tool that runs commands on multiple servers at once using SSH"
 readme = "README.md"
-version = "0.3.1"
+version = "0.3.2"
 authors = [
   {name = "vdmitriyev"}
 ]
@@ -40,10 +40,9 @@ dev = [
 
 [project.urls]
 
-bugs = "https://github.com/vdmitriyev/pymultissher/issues"
-changelog = "https://github.com/vdmitriyev/pymultissher/blob/master/changelog.md"
 homepage = "https://github.com/vdmitriyev/pymultissher"
-
+changelog = "https://github.com/vdmitriyev/pymultissher/blob/main/HISTORY.rst"
+bugs = "https://github.com/vdmitriyev/pymultissher/issues"
 
 #[tool.setuptools]
 #package-dir = {"" = "src"}
