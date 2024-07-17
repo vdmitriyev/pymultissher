@@ -1,4 +1,3 @@
-import json
 import os
 import traceback
 from sys import platform
@@ -10,18 +9,23 @@ from rich.console import Console
 from typing_extensions import Annotated
 
 from pymultissher import __description__
-from pymultissher.constants import VERBOSE, YAML_FILE_COMMANDS, YAML_FILE_DOMAINS
+from pymultissher.constants import YAML_FILE_COMMANDS, YAML_FILE_DOMAINS
 from pymultissher.exceptions import (
     MultiSSHerCreateClient,
     MultiSSHerNotSupported,
     YAMLConfigExists,
     YAMLValidationError,
 )
-from pymultissher.helpers import handle_dict_keys
+from pymultissher.helpers import handle_dict_keys, is_verbose, set_verbose
 from pymultissher.logger import get_logger
-from pymultissher.pymultissher import MultiSSHer, YAMLEmptyConfigHandler, YAMLHandler
+from pymultissher.pymultissher import MultiSSHer
+from pymultissher.yamlhandler import YAMLEmptyConfigHandler, YAMLHandler
 
 app = typer.Typer(help=__description__)
+
+
+def __set_global_verbose(verbose: bool = False):
+    set_verbose(verbose)
 
 
 @app.command()
@@ -38,6 +42,10 @@ def run_batch(
         Optional[str],
         typer.Option(prompt=False, help="Filters domains to be used"),
     ] = None,
+    verbose: Annotated[
+        Optional[bool],
+        typer.Option(prompt=False, help="Verbose output"),
+    ] = False,
 ):
     """
     Runs a batch of commands over SSH
@@ -48,6 +56,8 @@ def run_batch(
 
     if file_commands is not None and not os.path.exists(file_commands):
         raise FileNotFoundError(f"File not found: {file_commands}")
+
+    __set_global_verbose(verbose)
 
     logger = get_logger()
     ssher = MultiSSHer(logger=logger)
@@ -160,12 +170,10 @@ def verify(
 ):
     """Verify a given YAML file"""
 
-    if verbose:
-        global VERBOSE
-        VERBOSE = True
-
     if not os.path.exists(filename):
         raise FileNotFoundError(f"File not found: {filename}")
+
+    __set_global_verbose(verbose)
 
     logger = get_logger()
     console = Console()
@@ -183,12 +191,12 @@ def verify(
             console.print(f"{filename}", style="yellow")
             console.print(f"YAML errors: ", end=None)
             console.print(f"{ex}", style="red")
-            if verbose:
+            if is_verbose():
                 console.print_exception(show_locals=True)
     else:
         raise MultiSSHerNotSupported(f"Proved target is not supported: {target}")
 
-    if verbose:
+    if is_verbose():
         yml_handler.to_console()
 
 

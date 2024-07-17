@@ -6,24 +6,14 @@ from dataclasses import dataclass
 from datetime import datetime
 
 import paramiko
-import yaml
 from rich import print_json
 from rich.console import Console
 
-from pymultissher.constants import (
-    SUPPORTED_SSH_KEY_TYPES,
-    VERBOSE,
-    YAML_FILE_COMMANDS,
-    YAML_FILE_DOMAINS,
-)
-from pymultissher.exceptions import (
-    MultiSSHerException,
-    YAMLConfigExists,
-    YAMLGenericException,
-    YAMLValidationError,
-)
+from pymultissher.constants import SUPPORTED_SSH_KEY_TYPES
+from pymultissher.exceptions import MultiSSHerException
+from pymultissher.helpers import is_verbose, set_verbose
 from pymultissher.logger import get_logger
-from pymultissher.yamlhandler import YAMLEmptyConfigHandler, YAMLHandler
+from pymultissher.yamlhandler import YAMLHandler
 
 
 @dataclass
@@ -49,13 +39,13 @@ class MultiSSHer:
         self.console = Console()
 
     def verbose_print(self, msg: str) -> None:
-        if VERBOSE:
+        if is_verbose():
             self.console.print(msg, style="yellow")
 
     def banner(self):
         """Prints banner"""
         self.console.print("Print verbose information:", style="white")
-        self.console.print(VERBOSE, style="red")
+        self.console.print(is_verbose(), style="red")
 
     def load_defaults(self, filename: str):
         """Loads default SSH values to be use from a config file
@@ -248,7 +238,7 @@ class MultiSSHer:
 
         return ssh_obj
 
-    def apply_filter_on_domains(self, filter: str):
+    def apply_filter_on_domains(self, filter: str = None):
         """Apply filter on domains
 
         Args:
@@ -264,7 +254,7 @@ class MultiSSHer:
         filtered_domains = []
         for item in self.domains:
             try:
-                ssh_host = self.parse_hostname_item(item)
+                ssh_host = self.parse_hostname_item(item["domain"])
                 if filter in ssh_host.domain.lower():
                     filtered_domains.append(item)
             except Exception:

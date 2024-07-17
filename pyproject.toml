@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 name = "pymultissher"
 description = "pymultissher is a simple CLI tool that runs commands on multiple servers at once using SSH"
 readme = "README.md"
-version = "0.3.2"
+version = "0.3.3"
 authors = [
   {name = "vdmitriyev"}
 ]

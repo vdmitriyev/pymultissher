@@ -8,3 +8,16 @@ def handle_dict_keys(data: dict, key: str) -> None:
     print(key)
     if key not in data:
         data[key] = {}
+
+
+# hack: working with global verbose variable
+verbose = False
+
+
+def is_verbose():
+    return verbose
+
+
+def set_verbose(value):
+    global verbose
+    verbose = value
