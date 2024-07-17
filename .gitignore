@@ -4,6 +4,10 @@ domains.json
 commands.yml
 domains.yml
 
+commands*.yml
+domains*.yml
+output*.json
+
 
 # extentions
 *.csv
