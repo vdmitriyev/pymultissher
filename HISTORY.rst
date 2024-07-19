@@ -2,6 +2,11 @@
 History
 =======
 
+0.3.5 (2024-07-20)
+------------------
+
+* Add `--view` option to `run-batch` command. Could render results as a table.
+
 0.3.4 (2024-07-17)
 ------------------
 

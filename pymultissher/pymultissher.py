@@ -8,9 +8,10 @@ from datetime import datetime
 import paramiko
 from rich import print_json
 from rich.console import Console
+from rich.table import Table
 
-from pymultissher.constants import SUPPORTED_SSH_KEY_TYPES
-from pymultissher.exceptions import MultiSSHerException
+from pymultissher.constants import SUPPORTED_SSH_KEY_TYPES, VIEW_CONSOLE_FORMATS
+from pymultissher.exceptions import MultiSSHerException, MultiSSHerNotSupported
 from pymultissher.helpers import is_verbose, set_verbose
 from pymultissher.logger import get_logger
 from pymultissher.yamlhandler import YAMLHandler
@@ -262,6 +263,39 @@ class MultiSSHer:
 
         return filtered_domains
 
-    def to_console(self):
+    def to_console(self, view_format: str = "json"):
         """Prints gathered data"""
-        print_json(json.dumps(self.data, indent=4))
+
+        if view_format not in VIEW_CONSOLE_FORMATS:
+            raise MultiSSHerNotSupported(f"Wrong view format for console. Allowed: {VIEW_CONSOLE_FORMATS}")
+
+        if view_format.lower() == "json":
+            print_json(json.dumps(self.data, indent=4))
+
+        if view_format.lower() == "table":
+            self.__print_console_table__()
+
+    def __print_console_table__(self):
+        """Prints rich table to console"""
+
+        table = Table(title="Table view")
+        table.add_column("domain", justify="right", style="cyan", no_wrap=True)
+
+        # populate header column
+        for key in self.data:
+            for sub_key in self.data[key]:
+                for value_key in self.data[key][sub_key]:
+                    column_name = f"{sub_key}:{value_key}"
+                    table.add_column(column_name, justify="lefy", style="yellow", no_wrap=True)
+            break
+
+        # populate data
+        for key in self.data:
+            new_row = [key]
+            for sub_key in self.data[key]:
+                for value_key in self.data[key][sub_key]:
+                    column_name = f"{sub_key}:{value_key}"
+                    new_row.append(self.data[key][sub_key][value_key])
+            table.add_row(*new_row)
+
+        self.console.print(table)

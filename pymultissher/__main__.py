@@ -9,9 +9,14 @@ from rich.console import Console
 from typing_extensions import Annotated
 
 from pymultissher import __description__
-from pymultissher.constants import YAML_FILE_COMMANDS, YAML_FILE_DOMAINS
+from pymultissher.constants import (
+    VIEW_CONSOLE_FORMATS,
+    YAML_FILE_COMMANDS,
+    YAML_FILE_DOMAINS,
+)
 from pymultissher.exceptions import (
     MultiSSHerCreateClient,
+    MultiSSHerException,
     MultiSSHerNotSupported,
     YAMLConfigExists,
     YAMLValidationError,
@@ -46,6 +51,10 @@ def run_batch(
         Optional[bool],
         typer.Option(prompt=False, help="Verbose output"),
     ] = False,
+    view: Annotated[
+        Optional[str],
+        typer.Option(prompt=False, help=f"View format:{VIEW_CONSOLE_FORMATS}"),
+    ] = "json",
 ):
     """
     Runs a batch of commands over SSH
@@ -56,6 +65,9 @@ def run_batch(
 
     if file_commands is not None and not os.path.exists(file_commands):
         raise FileNotFoundError(f"File not found: {file_commands}")
+
+    if view not in VIEW_CONSOLE_FORMATS:
+        raise MultiSSHerNotSupported(f"Wrong view format for console. Allowed: {VIEW_CONSOLE_FORMATS}")
 
     __set_global_verbose(verbose)
 
@@ -100,7 +112,7 @@ def run_batch(
         except Exception:
             logger.error(traceback.format_exc())
 
-    ssher.to_console()
+    ssher.to_console(view)
 
 
 @app.command()
