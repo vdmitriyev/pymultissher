@@ -3,8 +3,7 @@ version: '3'
 vars:
   PACKAGE_NAME: "pymultissher"
   PACKAGE_VERSION:
-    sh:
-        python -c "import importlib.metadata; print(importlib.metadata.version('{{.PACKAGE_NAME}}'))"
+    sh: python -c "import importlib.metadata; print(importlib.metadata.version('{{.PACKAGE_NAME}}'))"
   VENV_DIR: ".venv"
 
 includes:
@@ -68,51 +67,46 @@ tasks:
       - echo 'package version {{.PACKAGE_VERSION}}'
       - python -m pymultissher --help
 
-
-  dev-install:
+  install:
     deps: [check-virtualenv]
     cmds:
       - pip install --editable .
       - python -c "import {{.PACKAGE_NAME}}"
 
-  dev-uninstall:
+  uninstall:
     deps: [check-virtualenv]
     cmds:
       - pip uninstall {{.PACKAGE_NAME}}
 
-  dev-pre-commit:
+  pre-commit:
     deps: [check-virtualenv]
     cmds:
       - pre-commit run --all-files
 
-  dev-tag-version:
-    deps: [check-virtualenv]
-    cmds:
-      - task: build
-      - echo  {{.PACKAGE_VERSION}}
-
-  dev-tag-create:
+  git-tag-create:
     deps: [check-virtualenv]
     cmds:
       - task: build
       - git tag {{.PACKAGE_VERSION}}
-      - task: dev-tag-describe
+      - echo "latest git tag"
+      - git describe --tags --abbrev=0
 
-  dev-tag-re-create:
+  git-tag-re-create:
     deps: [check-virtualenv]
     cmds:
       - git tag -d {{.PACKAGE_VERSION}}
-      - task: dev-tag-create
+      - task: git-tag-create
 
-  dev-tag-describe:
+  git-tag-print:
+    silent: true
     deps: [check-virtualenv]
     cmds:
-      - echo "git tags"
+      - echo "list of git tag"
       - git tag
-      - echo "latest git tags"
+      - echo "latest git tag"
       - git describe --tags --abbrev=0
 
-  dev-tag-push:
+  git-tag-push:
     deps: [check-virtualenv]
     cmds:
         - git push --tags origin

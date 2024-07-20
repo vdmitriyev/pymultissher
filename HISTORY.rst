@@ -5,6 +5,13 @@ History
 0.3.5 (2024-07-20)
 ------------------
 
+* Add `--view` option to `run-command` command to render results as a table.
+* Fix bug with empty output
+* Improve console outputs
+
+0.3.5 (2024-07-19)
+------------------
+
 * Add `--view` option to `run-batch` command. Could render results as a table.
 
 0.3.4 (2024-07-17)

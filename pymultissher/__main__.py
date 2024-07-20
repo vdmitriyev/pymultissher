@@ -16,7 +16,6 @@ from pymultissher.constants import (
 )
 from pymultissher.exceptions import (
     MultiSSHerCreateClient,
-    MultiSSHerException,
     MultiSSHerNotSupported,
     YAMLConfigExists,
     YAMLValidationError,
@@ -94,7 +93,7 @@ def run_batch(
             ssher.create_client(ssh_host)
 
             if ssher.client is None:
-                raise MultiSSHerCreateClient()
+                raise MultiSSHerCreateClient("SSH client is not ready")
 
             if ssher.client is not None:
                 for cmd_item in commands["commands"]:
@@ -129,11 +128,18 @@ def run_command(
         Optional[str],
         typer.Option(prompt=False, help="Filters domains to be used"),
     ] = None,
+    view: Annotated[
+        Optional[str],
+        typer.Option(prompt=False, help=f"View format:{VIEW_CONSOLE_FORMATS}"),
+    ] = "json",
 ):
     """Runs a single command over SSH (default: whoami)"""
 
     if not os.path.exists(filedomains):
         raise FileNotFoundError(f"File not found: {filedomains}")
+
+    if view not in VIEW_CONSOLE_FORMATS:
+        raise MultiSSHerNotSupported(f"Wrong view format for console. Allowed: {VIEW_CONSOLE_FORMATS}")
 
     logger = get_logger()
     ssher = MultiSSHer(logger=logger)
@@ -148,8 +154,9 @@ def run_command(
             ssh_host = ssher.parse_hostname_item(item["domain"])
             handle_dict_keys(ssher.data, key=ssh_host.domain)
             ssher.create_client(ssh_host)
+
             if ssher.client is None:
-                raise MultiSSHerCreateClient()
+                raise MultiSSHerCreateClient("SSH client is not ready")
 
             if ssher.client is not None:
                 # run command
@@ -163,7 +170,7 @@ def run_command(
         except Exception:
             logger.error(traceback.format_exc())
 
-    ssher.to_console()
+    ssher.to_console(view)
 
 
 @app.command()

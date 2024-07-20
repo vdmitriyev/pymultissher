@@ -123,12 +123,12 @@ class MultiSSHer:
                 disabled_algorithms={"pubkeys": ["rsa-sha2-256", "rsa-sha2-512"]},
             )
         except paramiko.AuthenticationException:
-            print(f"Authentication failed for server: {ssh_host.domain}")
-            logging.error(traceback.format_exc())
+            self.console.print(f"Authentication failed for server: {ssh_host.domain}", style="red")
+            self.logger.error(traceback.format_exc())
             self.close_client()
         except paramiko.SSHException as e:
-            print(f"SSH connection error: {e}")
-            logging.error(traceback.format_exc())
+            self.console.print(f"SSH connection error: {e}", style="red")
+            self.logger.error(traceback.format_exc())
             self.close_client()
 
     def close_client(self) -> None:
@@ -151,7 +151,8 @@ class MultiSSHer:
             self.verbose_print(f"Output:\n{output}")
             self.data[hostname][category_name] = {field_name: output}
         else:
-            self.logger.error(f"Error getting output: '{hostname}'")
+            self.data[hostname][category_name] = {field_name: None}
+            self.logger.error(f"Error getting output. Domain: '{hostname}'. Command: '{cmd}'")
 
     def execute_cmd_and_read_response(self, cmd: str) -> str:
         """Based on https://stackoverflow.com/questions/31834743/get-output-from-a-paramiko-ssh-exec-command-continuously
@@ -164,15 +165,21 @@ class MultiSSHer:
         """
 
         output = ""
+
         # is_active can be a false positive, so further test
         transport = self.client.get_transport()
+
+        if transport is None:
+            self.logger.error(f"Something wrong with transport: client.get_transport()")
+            return None
+
         if transport.is_active():
             try:
                 transport.send_ignore()
             except Exception as _e:
-                logging.error(traceback.format_exc())
+                self.logger.error(traceback.format_exc())
         else:
-            logging.error(f"Something wrong with transport")
+            self.logger.error(f"Something wrong with transport. transport.is_active(): {transport.is_active()}")
             return None
 
         channel = transport.open_session()
@@ -211,11 +218,11 @@ class MultiSSHer:
         if "name" in item:
             ssh_obj.domain = item["name"]
             self.verbose_print(f"{datetime.now()} domain: {ssh_obj.domain}")
-            logging.debug(f"domain: {ssh_obj.domain}")
+            self.logger.debug(f"domain: {ssh_obj.domain}")
 
         if "port" in item:
             ssh_obj.port = int(item["port"])
-            logging.debug(f"port: {ssh_obj.port}")
+            self.logger.debug(f"port: {ssh_obj.port}")
 
         ssh_obj.username = self.ssh_defaults.username
         if "user" in item:
@@ -239,19 +246,27 @@ class MultiSSHer:
 
         return ssh_obj
 
-    def apply_filter_on_domains(self, filter: str = None):
-        """Apply filter on domains
+    def apply_filter_on_domains(self, filter: str = None) -> list:
+        """Apply filter on domains.
+          Checks if keyword from filter found in domain.
+          If filter is None, then the list of domains remains unchanged.
 
         Args:
-            domains (dict): List of items with domains
-            filter (str): Filter to be applied
+
+            filter (str): Filter to be applied. Default to None.
+
+        Returns:
+            list: list of domains with filter applied
         """
 
         if filter is None:
             return self.domains
 
         filter = filter.lower()
-        self.logger.info(f"Filter domains based on: {filter}")
+
+        self.console.print(f"Filter domains based on: ", style="white", end=None)
+        self.console.print(f"{filter}", style="cyan")
+
         filtered_domains = []
         for item in self.domains:
             try:
