@@ -1,4 +1,4 @@
-# custom-files
+# custom files
 domains.json
 .env
 commands.yml
@@ -8,6 +8,8 @@ commands*.yml
 domains*.yml
 output*.json
 
+# test files
+test_file_*
 
 # extentions
 *.csv

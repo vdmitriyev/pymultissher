@@ -2,7 +2,14 @@
 History
 =======
 
-0.3.5 (2024-07-20)
+
+0.3.7 (2024-07-21)
+------------------
+
+* Add tests of CLI commands and params: `init`, `verify`, `--help`
+* Remove Python 3.9 support
+
+0.3.6 (2024-07-20)
 ------------------
 
 * Add `--view` option to `run-command` command to render results as a table.

@@ -2,6 +2,7 @@ import json
 import os
 
 import yaml
+from rich import print_json
 
 from pymultissher.constants import YAML_FILE_COMMANDS, YAML_FILE_DOMAINS
 from pymultissher.exceptions import (

@@ -32,7 +32,7 @@ tasks:
     cmds:
       - task: clean-build
       - task: clean-pyc
-      - task: clean-test
+      #- task: clean-test
 
   clean-build:
     deps: [check-virtualenv]
@@ -80,6 +80,7 @@ tasks:
 
   pre-commit:
     deps: [check-virtualenv]
+    silent: true
     cmds:
       - pre-commit run --all-files
 
@@ -118,6 +119,27 @@ tasks:
       - task: clean-build
       - py -m build
       - ls -l dist
+
+  pytest:
+    silent: true
+    deps: [check-virtualenv]
+    cmds:
+      - echo "running pytest"
+      - pytest
+
+  pytest-verbose:
+    silent: true
+    deps: [check-virtualenv]
+    cmds:
+      - echo "running pytest"
+      - pytest -v -s
+
+  tox:
+    silent: true
+    deps: [check-virtualenv]
+    cmds:
+      - echo "running tox"
+      - tox
 
   publish-test-pypi:
     deps: [check-virtualenv]
