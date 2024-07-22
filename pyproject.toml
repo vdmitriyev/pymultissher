@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 name = "pymultissher"
 description = "pymultissher is a simple CLI tool that runs commands on multiple servers at once using SSH"
 readme = "README.md"
-version = "0.3.7"
+version = "0.3.8"
 authors = [
   {name = "vdmitriyev"}
 ]
@@ -21,14 +21,22 @@ dependencies = [
   "PyYAML >=6.0.1"
 ]
 classifiers = [
-    "Programming Language :: Python :: 3",
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: System Administrators",
+    "Intended Audience :: Information Technology",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Topic :: System :: Monitoring",
+    "Topic :: Utilities"
 ]
 license = {text = "MIT license"}
 
-[entry_points]
-console_scripts = ["pymultissher = pymultissher.cli:main"]
 
 [project.optional-dependencies]
 dev = [
@@ -38,22 +46,25 @@ dev = [
     "ruff"  # linting
 ]
 
+[entry_points]
+console_scripts = ["pymultissher = pymultissher.__main__:app"]
+
+[project.scripts]
+pymultissher = "pymultissher.__main__:app"
+
 [project.urls]
 
 homepage = "https://github.com/vdmitriyev/pymultissher"
 changelog = "https://github.com/vdmitriyev/pymultissher/blob/main/HISTORY.rst"
-bugs = "https://github.com/vdmitriyev/pymultissher/issues"
-
-#[tool.setuptools]
-#package-dir = {"" = "src"}
-
+repository = "https://github.com/vdmitriyev/pymultissher.git"
+documentation = "https://vdmitriyev.github.io/pymultissher/"
 
 [tool.setuptools.package-data]
 "*" = ["*.*"]
 
 [tool.setuptools.packages.find]
 include = ["pymultissher"]
-exclude = ["scripts*", "tests*"]
+exclude = ["scripts*", "tests*", "example*", "docs*", "build", "tools", "site"]
 
 [tool.black]
 line-length = 120

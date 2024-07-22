@@ -1,12 +1,10 @@
 wheel==0.43.0
-pip==24.1.2
-bump-my-version==0.24.2
-wheel==0.43.0
-tox==4.16.0
+build==1.2.1
 twine==5.1.1
-pytest==8.0.0
+tox==4.16.0
+pip==24.1.2
 black==24.4.2
 isort==6.0.0b2
+pytest==8.0.0
+pytest-docker==3.1.1
 pre-commit==3.7.1
-build==1.2.1
-setuptools-git-versioning==2.0

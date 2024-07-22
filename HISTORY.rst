@@ -2,6 +2,12 @@
 History
 =======
 
+0.3.8 (2024-07-22)
+------------------
+
+* Enhance `pyproject.toml`
+* Add PyPI tags to `pyproject.toml`
+* Add `project.scripts` to `pyproject.toml` to run `pymultissher` as CLI
 
 0.3.7 (2024-07-21)
 ------------------

@@ -35,6 +35,7 @@ tasks:
       #- task: clean-test
 
   clean-build:
+    silent: true
     deps: [check-virtualenv]
     cmds:
       - echo "remove build artifacts"
@@ -44,6 +45,7 @@ tasks:
       - rm -fr {{.PACKAGE_NAME}}.egg-info
 
   clean-pyc:
+    silent: true
     deps: [check-virtualenv]
     cmds:
       - echo "remove Python file artifacts"
@@ -113,12 +115,14 @@ tasks:
         - git push --tags origin
 
   build:
+    silent: true
     deps: [check-virtualenv]
     cmds:
-      - echo "builds source and wheel package"
       - task: clean-build
+      - echo "builds source and wheel package"
       - py -m build
-      - ls -l dist
+      - echo "files in dist"
+      - ls -lh dist
 
   pytest:
     silent: true
@@ -126,6 +130,15 @@ tasks:
     cmds:
       - echo "running pytest"
       - pytest
+
+  pytest-all:
+    silent: true
+    deps: [check-virtualenv]
+    cmds:
+      - echo "running pytest all"
+      - pytest
+      - pytest -m "with_docker"
+
 
   pytest-verbose:
     silent: true
