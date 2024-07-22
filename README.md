@@ -29,10 +29,14 @@ The utility also allows using custom YAML configuration files to store domain in
     python -m pymultissher init
     ```
 * Edit YAML configuration files according to needs
-* Getting help
+* Getting further help
     ```
     python -m pymultissher --help
     ```
+* Utility could also be started as:
+	```
+	pymultissher init --help
+	```
 
 ## Usage: CLI
 
