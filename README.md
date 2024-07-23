@@ -50,8 +50,8 @@ Should be run as Python module (e.g., ```python -m pymultissher --help```)
 
 ## Contributing
 
-Please, check [CONTRIBUTING.rst](CONTRIBUTING.rst)
+Please, check [CONTRIBUTING.rst](https://github.com/vdmitriyev/pymultissher/blob/main/CONTRIBUTING.rst)
 
 ## License
 
-[MIT](LICENSE)
+[MIT](https://github.com/vdmitriyev/pymultissher/blob/main/LICENSE)

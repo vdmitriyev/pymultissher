@@ -35,6 +35,14 @@ def remove_files(request: pytest.FixtureRequest, generate_filenames: list):
             os.remove(filename)
 
 
+def test_cli_version_commands():
+    "Checks is CLI commands: version"
+
+    result = runner.invoke(app, ["version"])
+    assert result.exit_code == 0
+    assert "Version" in result.stdout
+
+
 def test_cli_help_commands():
     "Checks is CLI commands presented in help output"
 
@@ -43,7 +51,6 @@ def test_cli_help_commands():
     expected_commands = ["init", "run-batch", "run-command", "verify"]
     for cmd in expected_commands:
         assert cmd in result.stdout
-    # print(result.stdout)
 
 
 def test_cli_init_custom(generate_filenames: list):

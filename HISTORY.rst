@@ -2,6 +2,13 @@
 History
 =======
 
+0.3.9 (2024-07-23)
+------------------
+
+* Add `version` option
+* Add github-release Github Workflow
+* Add basic testing with pytest-docker and docker
+
 0.3.8 (2024-07-22)
 ------------------
 
