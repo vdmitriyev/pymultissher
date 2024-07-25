@@ -40,9 +40,14 @@ The utility also allows using custom YAML configuration files to store domain in
 
 ## Usage: CLI
 
-Should be run as Python module (e.g., ```python -m pymultissher --help```)
+Output of the CLI command:
+```
+pymultissher --help
+```
 
 ![](https://raw.githubusercontent.com/vdmitriyev/pymultissher/main/docs/images/cli-image.png)
+
+N.B. CLI could be also run as a Python module: ```python -m pymultissher --help```
 
 ## Documentation
 
