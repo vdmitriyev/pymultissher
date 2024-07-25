@@ -1,4 +1,4 @@
-name: Publish Python 🐍 distribution 📦 to PyPI and TestPyPI
+name: Publish Python 🐍 distribution 📦 to TestPyPI and PyPI
 
 on: push
 
@@ -52,11 +52,9 @@ jobs:
       with:
         repository-url: https://test.pypi.org/legacy/
 
-
   github-release:
     name: >-
-      Sign the Python 🐍 distribution 📦 with Sigstore
-      and upload them to GitHub Release
+      Upload Python 🐍 distribution to GitHub Release
     if: startsWith(github.ref, 'refs/tags/')  # only runs, when tas was pushed
     needs:
       - build
@@ -73,12 +71,12 @@ jobs:
       with:
         name: python-package-distributions
         path: dist/
-    - name: Sign the dists with Sigstore
-      uses: sigstore/gh-action-sigstore-python@v2.1.1
-      with:
-        inputs: >-
-          ./dist/*.tar.gz
-          ./dist/*.whl
+    # - name: Sign the dists with Sigstore
+    #   uses: sigstore/gh-action-sigstore-python@v2.1.1
+    #   with:
+    #     inputs: >-
+    #       ./dist/*.tar.gz
+    #       ./dist/*.whl
     - name: Create GitHub Release
       env:
         GITHUB_TOKEN: ${{ github.token }}
@@ -87,12 +85,11 @@ jobs:
         '${{ github.ref_name }}'
         --repo '${{ github.repository }}'
         --notes ""
-    - name: Upload artifact signatures to GitHub Release
+    - name: Upload artifact to GitHub Release
       env:
         GITHUB_TOKEN: ${{ github.token }}
       # Upload to GitHub Release using the `gh` CLI.
-      # `dist/` contains the built packages, and the
-      # sigstore-produced signatures and certificates.
+      # `dist/` contains the built packages
       run: >-
         gh release upload
         '${{ github.ref_name }}' dist/**
