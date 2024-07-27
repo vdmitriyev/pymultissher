@@ -28,10 +28,22 @@ from pymultissher.version import package_summary, package_version
 from pymultissher.yamlhandler import YAMLEmptyConfigHandler, YAMLHandler
 
 app = typer.Typer(help=__description__)
+console = Console()
 
 
 def __set_global_verbose(verbose: bool = False):
     set_verbose(verbose)
+
+
+def __option_dry_run(dry_run):
+    if dry_run:
+        console.print(f"Option `--dry-run`: ", end=None)
+        console.print(f"enabled", style="yellow")
+
+
+def __print_domain_name(domain):
+    console.print("Try to run commands on domain: ", end=None)
+    console.print(domain, style="yellow")
 
 
 @app.command()
@@ -56,6 +68,10 @@ def run_batch(
         Optional[bool],
         typer.Option(prompt=False, help="Verbose output"),
     ] = False,
+    dry_run: Annotated[
+        Optional[bool],
+        typer.Option(prompt=False, help="Only shows prints. Commands will not be run"),
+    ] = False,
 ):
     """
     Runs a batch of commands over SSH
@@ -67,10 +83,12 @@ def run_batch(
     if file_commands is not None and not os.path.exists(file_commands):
         raise FileNotFoundError(f"File not found: {file_commands}")
 
+    view = view.lower()
     if view not in VIEW_CONSOLE_FORMATS:
         raise MultiSSHerNotSupported(f"Wrong view format for console. Allowed: {VIEW_CONSOLE_FORMATS}")
 
     __set_global_verbose(verbose)
+    __option_dry_run(dry_run)
 
     logger = get_logger()
     ssher = MultiSSHer(logger=logger)
@@ -91,6 +109,7 @@ def run_batch(
         try:
 
             ssh_host = ssher.parse_hostname_item(item["domain"])
+            __print_domain_name(ssh_host.domain)
             handle_dict_keys(ssher.data, key=ssh_host.domain)
             ssher.create_client(ssh_host)
 
@@ -106,6 +125,7 @@ def run_batch(
                         cmd=cmd["command"],
                         category_name=cmd["report"]["category"],
                         field_name=cmd["report"]["field"],
+                        dry_run=dry_run,
                     )
 
                 ssher.close_client()
@@ -134,14 +154,26 @@ def run_command(
         Optional[str],
         typer.Option(prompt=False, help=f"View format:{VIEW_CONSOLE_FORMATS}"),
     ] = "json",
+    verbose: Annotated[
+        Optional[bool],
+        typer.Option(prompt=False, help="Verbose output"),
+    ] = False,
+    dry_run: Annotated[
+        Optional[bool],
+        typer.Option(prompt=False, help="Only shows prints. Commands will not be run"),
+    ] = False,
 ):
     """Runs a single command over SSH (default: whoami)"""
 
     if not os.path.exists(filedomains):
         raise FileNotFoundError(f"File not found: {filedomains}")
 
+    view = view.lower()
     if view not in VIEW_CONSOLE_FORMATS:
         raise MultiSSHerNotSupported(f"Wrong view format for console. Allowed: {VIEW_CONSOLE_FORMATS}")
+
+    __set_global_verbose(verbose)
+    __option_dry_run(dry_run)
 
     logger = get_logger()
     ssher = MultiSSHer(logger=logger)
@@ -154,6 +186,7 @@ def run_command(
     for item in filtered_domains:
         try:
             ssh_host = ssher.parse_hostname_item(item["domain"])
+            __print_domain_name(ssh_host.domain)
             handle_dict_keys(ssher.data, key=ssh_host.domain)
             ssher.create_client(ssh_host)
 
@@ -161,12 +194,12 @@ def run_command(
                 raise MultiSSHerCreateClient("SSH client is not ready")
 
             if ssher.client is not None:
-                # run command
                 ssher.run_command_over_ssh(
                     hostname=ssh_host.domain,
                     cmd=command,
                     category_name="command",
                     field_name=command.lower().replace(" ", "_"),
+                    dry_run=dry_run,
                 )
 
         except Exception:
@@ -238,7 +271,6 @@ def init(
 ):
     """Generates initial YAML configuration files with SSH defaults, domains and commands"""
 
-    logger = get_logger()
     console = Console()
     yml_handler = YAMLEmptyConfigHandler()
 
@@ -278,7 +310,6 @@ def version(
     ] = False,
 ):
     """Shows package version"""
-    console = Console()
 
     if not verbose:
         console.print(f"Version: ", style="white", end=None)

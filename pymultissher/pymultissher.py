@@ -137,22 +137,35 @@ class MultiSSHer:
         if self.client is not None:
             self.client.close()
 
-    def run_command_over_ssh(self, hostname: str, cmd: str, category_name: str, field_name: str = "value"):
+    def run_command_over_ssh(
+        self, hostname: str, cmd: str, category_name: str, field_name: str = "value", dry_run: bool = False
+    ):
         """Runs command on the server.
 
         Args:
-            username (str): The username for SSH login.
+            hostname (str): host to be used
+            cmd (str): command to run
+            category_name (str): category for report
+            field_name (str, optional): filed name for report_. Defaults to "value".
+            dry_run (bool, optional): no run, only logs. Defaults to False.
         """
 
         self.logger.debug(f"Run CMD on the server: {cmd}")
-        output = self.execute_cmd_and_read_response(cmd)
-        if output:
-            self.verbose_print(f"Server: '{hostname}'")
-            self.verbose_print(f"Output:\n{output}")
-            self.data[hostname][category_name] = {field_name: output}
+
+        if not dry_run:
+            output = self.execute_cmd_and_read_response(cmd)
+            if output:
+                self.verbose_print(f"Server: '{hostname}'")
+                self.verbose_print(f"Output:\n{output}")
+                self.data[hostname][category_name] = {field_name: output}
+            else:
+                self.data[hostname][category_name] = {field_name: None}
+                self.logger.error(f"Error getting output. Domain: '{hostname}'. Command: '{cmd}'")
         else:
-            self.data[hostname][category_name] = {field_name: None}
-            self.logger.error(f"Error getting output. Domain: '{hostname}'. Command: '{cmd}'")
+            msg = "No execution of CMD on server, `--dry-run` option is enabled. CMD: "
+            self.logger.debug(f"msg: {dry_run}")
+            self.console.print(msg, end=None)
+            self.console.print(cmd, style="yellow")
 
     def execute_cmd_and_read_response(self, cmd: str) -> str:
         """Based on https://stackoverflow.com/questions/31834743/get-output-from-a-paramiko-ssh-exec-command-continuously

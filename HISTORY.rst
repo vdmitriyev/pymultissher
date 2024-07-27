@@ -2,6 +2,12 @@
 History
 =======
 
+0.3.10 (2024-07-27)
+------------------
+
+* Add `--dry-run` option to `run-batch`` and `run-command`
+* Fix lower case of `--table` option
+
 0.3.9 (2024-07-23)
 ------------------
 

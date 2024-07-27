@@ -33,9 +33,13 @@ The utility also allows using custom YAML configuration files to store domain in
     ```
     pymultissher --help
     ```
-* Utility could also be started as a Python module:
+* Utility could also be started as a Python module
     ```
     python -m pymultissher --help
+    ```
+* Utility could also started with a `--dry-run`, which will not executed any commands over SSH
+    ```
+    python -m pymultissher run-command --command "whoiam" --dry-run`
     ```
 
 ## Usage: CLI
