@@ -138,14 +138,14 @@ def run_batch(
 
 @app.command()
 def run_command(
-    filedomains: Annotated[
-        Optional[str],
-        typer.Option(prompt=False, help="Path to the YAML file containing domain names"),
-    ] = YAML_FILE_DOMAINS,
     command: Annotated[
         Optional[str],
         typer.Option(prompt=False, help="Command to be run on the server"),
     ] = "whoami",
+    file_domains: Annotated[
+        Optional[str],
+        typer.Option(prompt=False, help="Path to the YAML file containing domain names"),
+    ] = YAML_FILE_DOMAINS,
     filter_domain: Annotated[
         Optional[str],
         typer.Option(prompt=False, help="Filters domains to be used"),
@@ -165,8 +165,8 @@ def run_command(
 ):
     """Runs a single command over SSH (default: whoami)"""
 
-    if not os.path.exists(filedomains):
-        raise FileNotFoundError(f"File not found: {filedomains}")
+    if not os.path.exists(file_domains):
+        raise FileNotFoundError(f"File not found: {file_domains}")
 
     view = view.lower()
     if view not in VIEW_CONSOLE_FORMATS:
@@ -178,8 +178,8 @@ def run_command(
     logger = get_logger()
     ssher = MultiSSHer(logger=logger)
 
-    ssher.load_defaults(filedomains)
-    ssher.load_domains(filedomains)
+    ssher.load_defaults(file_domains)
+    ssher.load_domains(file_domains)
 
     filtered_domains = ssher.apply_filter_on_domains(filter=filter_domain)
 
