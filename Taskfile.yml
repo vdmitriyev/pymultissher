@@ -86,6 +86,13 @@ tasks:
     cmds:
       - pre-commit run --all-files
 
+  pre-commit-update:
+    deps: [check-virtualenv]
+    silent: true
+    cmds:
+      - pre-commit autoupdate
+      - pre-commit run --all-files
+
   git-tag-create:
     deps: [check-virtualenv]
     cmds:
