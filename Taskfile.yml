@@ -67,7 +67,7 @@ tasks:
     deps: [check-virtualenv]
     cmds:
       - echo 'package version {{.PACKAGE_VERSION}}'
-      - python -m pymultissher --help
+      - python -m {{.PACKAGE_NAME}} --help
 
   install:
     deps: [check-virtualenv]
