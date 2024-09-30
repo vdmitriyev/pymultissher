@@ -3,13 +3,18 @@ version: '3'
 vars:
   PACKAGE_NAME: "pymultissher"
   PACKAGE_VERSION:
-    sh: python -c "import importlib.metadata; print(importlib.metadata.version('{{.PACKAGE_NAME}}'))"
+    sh: |
+      python -c """
+      import importlib.metadata
+      try:
+        print(importlib.metadata.version('{{.PACKAGE_NAME}}'))
+      except ImportError:
+        print('0.0.0')
+      """
   VENV_DIR: ".venv"
 
-includes:
-  win: ./Taskfile_windows.yml
-
 tasks:
+
   default:
     silent: true
     cmds:
@@ -29,10 +34,12 @@ tasks:
 
   clean-all:
     deps: [check-virtualenv]
+    run: once
+    silent: true
     cmds:
       - task: clean-build
       - task: clean-pyc
-      #- task: clean-test
+      - task: clean-test
 
   clean-build:
     silent: true
@@ -63,7 +70,7 @@ tasks:
       - rm -fr htmlcov/
       - rm -fr .pytest_cache
 
-  package-help:
+  version:
     deps: [check-virtualenv]
     cmds:
       - echo 'package version {{.PACKAGE_VERSION}}'
@@ -80,20 +87,25 @@ tasks:
     cmds:
       - pip uninstall {{.PACKAGE_NAME}}
 
-  pre-commit:
-    deps: [check-virtualenv]
+  build:
     silent: true
+    deps: [check-virtualenv]
     cmds:
-      - pre-commit run --all-files
+      - task: clean-build
+      - echo "builds source and wheel package"
+      - py -m build
+      - echo "files in dist"
+      - ls -lh dist
 
-  pre-commit-update:
+  publish-test-pypi:
     deps: [check-virtualenv]
-    silent: true
     cmds:
-      - pre-commit autoupdate
-      - pre-commit run --all-files
+      - echo "uploads to testpypi"
+      - task: build
+      - py -m twine upload --repository testpypi dist/*
 
   git-tag-create:
+    silent: true
     deps: [check-virtualenv]
     cmds:
       - task: build
@@ -121,16 +133,6 @@ tasks:
     cmds:
         - git push --tags origin
 
-  build:
-    silent: true
-    deps: [check-virtualenv]
-    cmds:
-      - task: clean-build
-      - echo "builds source and wheel package"
-      - py -m build
-      - echo "files in dist"
-      - ls -lh dist
-
   pytest:
     silent: true
     deps: [check-virtualenv]
@@ -146,7 +148,6 @@ tasks:
       - pytest
       - pytest -m "with_docker"
 
-
   pytest-verbose:
     silent: true
     deps: [check-virtualenv]
@@ -161,9 +162,21 @@ tasks:
       - echo "running tox"
       - tox
 
-  publish-test-pypi:
+  pre-commit-install:
     deps: [check-virtualenv]
+    silent: true
     cmds:
-      - echo "builds source and wheel package"
-      - task: build
-      - py -m twine upload --repository testpypi dist/*
+      - pre-commit install
+
+  pre-commit-run:
+    deps: [check-virtualenv]
+    silent: true
+    cmds:
+      - pre-commit run --all-files
+
+  pre-commit-update:
+    deps: [check-virtualenv]
+    silent: true
+    cmds:
+      - pre-commit autoupdate
+      - pre-commit run --all-files
