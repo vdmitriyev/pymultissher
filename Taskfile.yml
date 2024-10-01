@@ -16,6 +16,7 @@ vars:
 tasks:
 
   default:
+    desc: lists all tasks
     silent: true
     cmds:
       - task --list-all
@@ -23,6 +24,7 @@ tasks:
       - echo "Example usage-> 'task check-virtualenv'"
 
   check-virtualenv:
+    desc: checks Python virtualenv activation
     silent: true
     run: once
     cmds:
@@ -33,6 +35,7 @@ tasks:
       - python --version
 
   clean-all:
+    desc: cleans all
     deps: [check-virtualenv]
     run: once
     silent: true
@@ -42,6 +45,7 @@ tasks:
       - task: clean-test
 
   clean-build:
+    desc: cleans Python builds
     silent: true
     deps: [check-virtualenv]
     cmds:
@@ -52,6 +56,7 @@ tasks:
       - rm -fr {{.PACKAGE_NAME}}.egg-info
 
   clean-pyc:
+    desc: cleans Python artifacts
     silent: true
     deps: [check-virtualenv]
     cmds:
@@ -62,6 +67,7 @@ tasks:
       #- find . -name '__pycache__' -exec rm -fr {} +
 
   clean-test:
+    desc: cleans tests artifacts
     deps: [check-virtualenv]
     cmds:
       - echo "remove test and coverage artifacts"
@@ -71,23 +77,27 @@ tasks:
       - rm -fr .pytest_cache
 
   version:
+    desc: shows version of "{{.PACKAGE_NAME}}"
     deps: [check-virtualenv]
     cmds:
       - echo 'package version {{.PACKAGE_VERSION}}'
       - python -m {{.PACKAGE_NAME}} --help
 
   install:
+    desc: installs "{{.PACKAGE_NAME}}"
     deps: [check-virtualenv]
     cmds:
       - pip install --editable .
       - python -c "import {{.PACKAGE_NAME}}"
 
   uninstall:
+    desc: uninstalls "{{.PACKAGE_NAME}}"
     deps: [check-virtualenv]
     cmds:
       - pip uninstall {{.PACKAGE_NAME}}
 
   build:
+    desc: builds "{{.PACKAGE_NAME}}"
     silent: true
     deps: [check-virtualenv]
     cmds:
@@ -98,6 +108,7 @@ tasks:
       - ls -lh dist
 
   publish-test-pypi:
+    desc: publishes "{{.PACKAGE_NAME}}"
     deps: [check-virtualenv]
     cmds:
       - echo "uploads to testpypi"
@@ -105,6 +116,7 @@ tasks:
       - py -m twine upload --repository testpypi dist/*
 
   git-tag-create:
+    desc: creates a new git tag (uses version of "{{.PACKAGE_NAME}}")
     silent: true
     deps: [check-virtualenv]
     cmds:
@@ -114,12 +126,14 @@ tasks:
       - git describe --tags --abbrev=0
 
   git-tag-re-create:
+    desc: re-creates a new git tag (uses version of "{{.PACKAGE_NAME}}")
     deps: [check-virtualenv]
     cmds:
       - git tag -d {{.PACKAGE_VERSION}}
       - task: git-tag-create
 
   git-tag-print:
+    desc: prints all git tags
     silent: true
     deps: [check-virtualenv]
     cmds:
@@ -129,11 +143,13 @@ tasks:
       - git describe --tags --abbrev=0
 
   git-tag-push:
+    desc: pushes all git tags to remote
     deps: [check-virtualenv]
     cmds:
         - git push --tags origin
 
   pytest:
+    desc: runs tests
     silent: true
     deps: [check-virtualenv]
     cmds:
@@ -141,6 +157,7 @@ tasks:
       - pytest
 
   pytest-all:
+    desc: runs tests (all)
     silent: true
     deps: [check-virtualenv]
     cmds:
@@ -149,6 +166,7 @@ tasks:
       - pytest -m "with_docker"
 
   pytest-verbose:
+    desc: runs tests (verbose)
     silent: true
     deps: [check-virtualenv]
     cmds:
@@ -156,6 +174,7 @@ tasks:
       - pytest -v -s
 
   tox:
+    desc: runs tox
     silent: true
     deps: [check-virtualenv]
     cmds:
@@ -163,18 +182,21 @@ tasks:
       - tox
 
   pre-commit-install:
+    desc: installs git hooks
     deps: [check-virtualenv]
     silent: true
     cmds:
       - pre-commit install
 
   pre-commit-run:
+    desc: runs installed git hooks
     deps: [check-virtualenv]
     silent: true
     cmds:
       - pre-commit run --all-files
 
   pre-commit-update:
+    desc: updates git hooks
     deps: [check-virtualenv]
     silent: true
     cmds:
