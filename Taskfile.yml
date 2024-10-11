@@ -24,7 +24,8 @@ tasks:
       - echo "Example usage-> 'task check-virtualenv'"
 
   check-virtualenv:
-    desc: checks Python virtualenv activation
+    desc: checks Python's virtualenv activation
+    aliases: [cv]
     silent: true
     run: once
     cmds:
@@ -117,8 +118,9 @@ tasks:
 
   git-tag-create:
     desc: creates a new git tag (uses version of "{{.PACKAGE_NAME}}")
-    silent: true
+    aliases: [gtc]
     deps: [check-virtualenv]
+    silent: true
     cmds:
       - task: build
       - git tag {{.PACKAGE_VERSION}}
@@ -127,15 +129,18 @@ tasks:
 
   git-tag-re-create:
     desc: re-creates a new git tag (uses version of "{{.PACKAGE_NAME}}")
+    aliases: [gtrc]
     deps: [check-virtualenv]
+    silent: true
     cmds:
       - git tag -d {{.PACKAGE_VERSION}}
       - task: git-tag-create
 
-  git-tag-print:
-    desc: prints all git tags
-    silent: true
+  git-tag-show:
+    desc: shows  all git tags
+    aliases: [gts]
     deps: [check-virtualenv]
+    silent: true
     cmds:
       - echo "list of git tag"
       - git tag
@@ -144,7 +149,9 @@ tasks:
 
   git-tag-push:
     desc: pushes all git tags to remote
+    aliases: [gtp]
     deps: [check-virtualenv]
+    silent: true
     cmds:
         - git push --tags origin
 
@@ -183,6 +190,7 @@ tasks:
 
   pre-commit-install:
     desc: installs git hooks
+    aliases: [pci]
     deps: [check-virtualenv]
     silent: true
     cmds:
@@ -190,6 +198,7 @@ tasks:
 
   pre-commit-run:
     desc: runs installed git hooks
+    aliases: [pcr]
     deps: [check-virtualenv]
     silent: true
     cmds:
@@ -197,6 +206,7 @@ tasks:
 
   pre-commit-update:
     desc: updates git hooks
+    aliases: [pcu]
     deps: [check-virtualenv]
     silent: true
     cmds:
