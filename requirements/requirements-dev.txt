@@ -1,8 +1,8 @@
 wheel==0.44.0
 build==1.2.2.post1
 twine==5.1.1
-tox==4.21.2
-pip==24.2
+tox==4.23.2
+pip==24.3.1
 black==24.10.0
 isort==6.0.0b2
 pytest==8.3.3
