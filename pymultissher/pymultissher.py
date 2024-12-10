@@ -97,7 +97,7 @@ class MultiSSHer:
         """
 
         self.client = paramiko.SSHClient()
-        self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # nosec CWE-295
+        self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # nosec B507
 
         # Load private key with password
         try:
@@ -197,7 +197,7 @@ class MultiSSHer:
 
         channel = transport.open_session()
         channel.set_combine_stderr(1)  # not handling stdout & stderr separately
-        channel.exec_command(cmd)  # nosec CWE-78
+        channel.exec_command(cmd)  # nosec B601
         channel.shutdown_write()  # command was sent, no longer need stdin
 
         def __response_read(channel):
