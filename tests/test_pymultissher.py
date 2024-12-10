@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """Tests for `pymultissher` package."""
 
 import pytest
