@@ -271,35 +271,35 @@ def init(
 ):
     """Generates initial YAML configuration files with SSH defaults, domains and commands"""
 
-    console = Console()
+    _console = Console()
     yml_handler = YAMLEmptyConfigHandler()
 
     try:
         yml_handler.generate_empty_configs_domains(filename=file_domains)
-        console.print(f"Generated config file for domains: ", end=None)
-        console.print(f"{file_domains}", style="green")
-    except YAMLConfigExists as ex:
-        console.print(f"Config file already exists: ", style="red", end=None)
-        console.print(f"{file_domains}", style="yellow")
+        _console.print("Generated config file for domains: ", end=None)
+        _console.print("{file_domains}", style="green")
+    except YAMLConfigExists:
+        _console.print("Config file already exists: ", style="red", end=None)
+        _console.print("{file_domains}", style="yellow")
         if not verbose:
-            console.print(f"Exception: ", end=None)
-            console.print(f"{ex}", style="red")
+            _console.print("Exception: ", end=None)
+            _console.print("{ex}", style="red")
         else:
-            console.print_exception(show_locals=True)
+            _console.print_exception(show_locals=True)
 
     try:
         yml_handler.generate_empty_configs_commands(filename=file_commands)
-        console.print(f"Generated config file for commands: ", end=None)
-        console.print(f"{file_commands}", style="green")
+        _console.print("Generated config file for commands: ", end=None)
+        _console.print("{file_commands}", style="green")
     except YAMLConfigExists as ex:
-        console.print(f"Config file already exists: ", style="red", end=None)
-        console.print(f"{file_commands}", style="yellow")
+        _console.print("Config file already exists: ", style="red", end=None)
+        _console.print("{file_commands}", style="yellow")
 
         if not verbose:
-            console.print(f"Exception: ", end=None)
-            console.print(f"{ex}", style="red")
+            _console.print("Exception: ", end=None)
+            _console.print("{ex}", style="red")
         else:
-            console.print_exception(show_locals=True)
+            _console.print_exception(show_locals=True)
 
 
 @app.command()
@@ -312,8 +312,8 @@ def version(
     """Shows package version"""
 
     if not verbose:
-        console.print(f"Version: ", style="white", end=None)
-        console.print(f"{package_version()}", style="yellow")
+        console.print("Version: ", style="white", end=None)
+        console.print("{package_version()}", style="yellow")
     else:
         table = Table()
         table.add_column("Field", justify="right", style="cyan", no_wrap=True)

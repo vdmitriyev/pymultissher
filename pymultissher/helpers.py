@@ -1,3 +1,6 @@
+"""Provides module specific helper functions."""
+
+
 def handle_dict_keys(data: dict, key: str) -> None:
     """Check if key exists in dict and add it, if it doesn't exist.
 
@@ -13,10 +16,10 @@ def handle_dict_keys(data: dict, key: str) -> None:
 verbose = False
 
 
-def is_verbose():
+def is_verbose() -> bool:
     return verbose
 
 
-def set_verbose(value):
+def set_verbose(value: bool) -> None:
     global verbose
     verbose = value

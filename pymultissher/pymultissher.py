@@ -1,5 +1,4 @@
 import json
-import logging
 import os
 import traceback
 from dataclasses import dataclass
@@ -12,13 +11,15 @@ from rich.table import Table
 
 from pymultissher.constants import SUPPORTED_SSH_KEY_TYPES, VIEW_CONSOLE_FORMATS
 from pymultissher.exceptions import MultiSSHerException, MultiSSHerNotSupported
-from pymultissher.helpers import is_verbose, set_verbose
+from pymultissher.helpers import is_verbose
 from pymultissher.logger import get_logger
 from pymultissher.yamlhandler import YAMLHandler
 
 
 @dataclass
 class SSHCredentials:
+    """Handles SSH credentials as a class"""
+
     domain: str = "localhost"
     port: int = 22
     username: str = "root"
@@ -28,6 +29,7 @@ class SSHCredentials:
 
 
 class MultiSSHer:
+    """Main class to handle all SSH interactions"""
 
     def __init__(self, logger=None):
         if logger is None:
@@ -38,8 +40,15 @@ class MultiSSHer:
         self.data = {}
         self.ssh_defaults = SSHCredentials()
         self.console = Console()
+        self.domains = []
+        self.client = None
 
     def verbose_print(self, msg: str) -> None:
+        """Prints additional message, if verbose flag has been set.
+
+        Args:
+            msg (str): Message to print
+        """
         if is_verbose():
             self.console.print(msg, style="yellow")
 
@@ -85,7 +94,7 @@ class MultiSSHer:
         yml_handler.load_data()
 
         if "domains" not in yml_handler.data:
-            raise MultiSSHerException(f"Do domains were found")
+            raise MultiSSHerException("Domains have been found")
 
         self.domains = yml_handler.data["domains"]
 
@@ -96,6 +105,7 @@ class MultiSSHer:
             ssh_host(SSHCredentials): data class that contains all necessary parameters for SSH connection
         """
 
+        key = None
         self.client = paramiko.SSHClient()
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # nosec B507
 
@@ -183,13 +193,13 @@ class MultiSSHer:
         transport = self.client.get_transport()
 
         if transport is None:
-            self.logger.error(f"Something wrong with transport: client.get_transport()")
+            self.logger.error("Something went wrong with transport: client.get_transport()")
             return None
 
         if transport.is_active():
             try:
                 transport.send_ignore()
-            except Exception as _e:
+            except Exception:
                 self.logger.error(traceback.format_exc())
         else:
             self.logger.error(f"Something wrong with transport. transport.is_active(): {transport.is_active()}")
@@ -277,8 +287,8 @@ class MultiSSHer:
 
         filter = filter.lower()
 
-        self.console.print(f"Filter domains based on: ", style="white", end=None)
-        self.console.print(f"{filter}", style="cyan")
+        self.console.print("Filter domains based on: ", style="white", end=None)
+        self.console.print("{filter}", style="cyan")
 
         filtered_domains = []
         for item in self.domains:
