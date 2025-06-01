@@ -1,4 +1,4 @@
 paramiko==3.5.1
 click==8.1.8
-typer==0.15.3
+typer==0.16.0
 PyYAML==6.0.2
