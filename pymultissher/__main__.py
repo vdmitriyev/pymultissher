@@ -276,30 +276,31 @@ def init(
 
     try:
         yml_handler.generate_empty_configs_domains(filename=file_domains)
-        _console.print("Generated config file for domains: ", end=None)
-        _console.print("{file_domains}", style="green")
-    except YAMLConfigExists:
+        _console.print("Generated config file for domains: ", style="blue", end=None)
+        _console.print(f"{file_domains}", style="green")
+    except YAMLConfigExists as ex:
         _console.print("Config file already exists: ", style="red", end=None)
-        _console.print("{file_domains}", style="yellow")
-        if not verbose:
-            _console.print("Exception: ", end=None)
-            _console.print("{ex}", style="red")
-        else:
+        _console.print(f"{file_domains}", style="blue")
+
+        if verbose:
             _console.print_exception(show_locals=True)
+        else:
+            _console.print("Exception: ", style="red", end=None)
+            _console.print(f"{ex}\n", style="white")
 
     try:
         yml_handler.generate_empty_configs_commands(filename=file_commands)
-        _console.print("Generated config file for commands: ", end=None)
-        _console.print("{file_commands}", style="green")
+        _console.print("Generated config file for commands: ", style="blue", end=None)
+        _console.print(f"{file_commands}", style="green")
     except YAMLConfigExists as ex:
         _console.print("Config file already exists: ", style="red", end=None)
-        _console.print("{file_commands}", style="yellow")
+        _console.print(f"{file_commands}", style="blue")
 
-        if not verbose:
-            _console.print("Exception: ", end=None)
-            _console.print("{ex}", style="red")
-        else:
+        if verbose:
             _console.print_exception(show_locals=True)
+        else:
+            _console.print("Exception: ", style="red", end=None)
+            _console.print(f"{ex}\n", style="white")
 
 
 @app.command()
@@ -313,7 +314,7 @@ def version(
 
     if not verbose:
         console.print("Version: ", style="white", end=None)
-        console.print("{package_version()}", style="yellow")
+        console.print(f"{package_version()}", style="yellow")
     else:
         table = Table()
         table.add_column("Field", justify="right", style="cyan", no_wrap=True)
