@@ -7,6 +7,7 @@ History
 
 * updating python package versions
 * fix console message outputs
+* improve license clarity according to the the `PEP 639 ``
 
 0.3.15 (2025-10-05)
 ------------------

@@ -25,7 +25,6 @@ classifiers = [
     "Environment :: Console",
     "Intended Audience :: System Administrators",
     "Intended Audience :: Information Technology",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.10",
@@ -35,7 +34,7 @@ classifiers = [
     "Topic :: System :: Monitoring",
     "Topic :: Utilities"
 ]
-license = {text = "MIT license"}
+license = "MIT"
 
 
 [project.optional-dependencies]
