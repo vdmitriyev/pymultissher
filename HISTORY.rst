@@ -2,6 +2,12 @@
 History
 =======
 
+0.3.16 (2025-11-02)
+------------------
+
+* updating python package versions
+* fix console message outputs
+
 0.3.15 (2025-10-05)
 ------------------
 
