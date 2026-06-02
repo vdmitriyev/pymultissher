@@ -1,9 +1,9 @@
 wheel==0.47.0
 build==1.5.0
 twine==6.2.0
-tox==4.53.0
-pip==26.1
-black==26.3.1
+tox==4.55.0
+pip==26.1.2
+black==26.5.1
 isort==8.0.1
 pytest==9.0.3
 pytest-docker==3.2.5
