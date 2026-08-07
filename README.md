@@ -1,6 +1,8 @@
 ## About
 
-pymultissher is a simple CLI tool that runs commands on multiple servers over SSH.
+![PyPI - Version][def] ![PyPI - License](https://img.shields.io/pypi/l/pymultissher?style=flat) ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pymultissher?style=flat)
+
+`pymultissher` is a simple CLI tool that runs commands on multiple servers over SSH.
 
 ## Why "yet another" SSH tool?
 
@@ -64,3 +66,6 @@ Please, check [CONTRIBUTING.rst](https://github.com/vdmitriyev/pymultissher/blob
 ## License
 
 [MIT](https://github.com/vdmitriyev/pymultissher/blob/main/LICENSE)
+
+
+[def]: https://img.shields.io/pypi/v/pymultissher?style=flat
