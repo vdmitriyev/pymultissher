@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 name = "pymultissher"
 description = "pymultissher is a simple CLI tool that runs commands on multiple servers at once using SSH"
 readme = "README.md"
-version = "0.4.1"
+version = "0.4.2"
 authors = [
   {name = "vdmitriyev"}
 ]
@@ -18,7 +18,8 @@ dependencies = [
   "paramiko >=4.0.0",
   "click >=8.1.7",
   "typer >=0.12.3",
-  "PyYAML >=6.0.1"
+  "PyYAML >=6.0.1",
+  "typing-extensions >=4.16.0"
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
