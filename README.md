@@ -20,9 +20,9 @@ The utility also allows using custom YAML configuration files to store domain in
 
 ## Getting Started
 
-* Install (TestPyPI)
+* Install
     ```
-    pip install --index-url https://test.pypi.org/simple/ --upgrade pymultissher
+    pip install --upgrade pymultissher
     ```
 * Generate initial configuration files
     ```
@@ -41,7 +41,6 @@ The utility also allows using custom YAML configuration files to store domain in
     ```
     python -m pymultissher --help
     ```
-
 
 ## Usage: CLI
 
